@@ -1,0 +1,10 @@
+*.pyc
+/.idea
+.DS_Store
+*.swp
+backup
+tmp
+.idea
+*.data
+*.eps
+log_*

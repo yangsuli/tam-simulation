@@ -1,2 +1,54 @@
-# tam-simulation
-The TAM-based Simulation Framework
+TAM Simulation Framework.
+====
+The TAM simulation framework provides building blocks to simulate systems based on the Thread Architecture Model (TAM).
+For detailed discussion on TAM and how to use TAM to understand system scheduling,  please refer to our OSDI'18 paper: [Principled Schedulability Analysis for Distributed Storage Systems using Thread Architecture Models](https://www.usenix.org/conference/osdi18/presentation/yang).
+
+# Key Abstractions
+
+The TAM simulation framework is based on four key abstractions: resource, stage-request, stage, and scheduler. 
+
+### Resource
+
+Resource can be used to model any kind of resources, e.g., cpu, I/O, network.
+One can specify the rate and parallelism of a resource. 
+For example, an 8-core cpu of 1 GHz has a rate of 1 (per core) and a parallelism of 8.
+
+### Stage-Request
+
+In a complex system, a client request typically goes through different components while being serviced,
+thus is divided into multiple *stage-requests*.   
+Each stage-request represents the processing that is done at one component, and consumes certain resources (described in the *resource profile* of the stage-request).  
+
+### Stage
+
+Stage is a component that process stage-requests. Each stage has certain number of workers(threads) that
+continuously pick up stage-requests and process them.
+During the processing, the stage consume resources based on the resource profile of the stage-request.
+
+### Scheduler
+
+A scheduler encodes the logic of how stages pick up which requests to process.
+
+Each (bounded) stage has a scheduler and a request_cost_function that maps a stage-request to a virtual cost. The scheduler takes the virtual cost and use a policy (e.g., fairness, or priority) to decide which request to process next. 
+
+We provide some baisc schedulers, such as FIFO, weighted fair queuing, and dominate resource fariness scheduling; the user is free to implement their own scheduling policies as well.    
+
+# Getting Started
+By assembing different stages, resources, and schedulers, possibly using a TAM as a blueprint, one can form systems with various thread architectures, which may reflect exsting or hypothetical  system designs. With a given simulated system, one can specify workload charactirstics (e.g., request types and arrival distribution); the framework then simulates how requests flow through the stages and consume resources, and reports detailed performance statistics. 
+To show how the whole process works,  basic_example.py runs a very simple simulation. You can run the script, try to change it, and play around to see how things work.
+
+
+
+# Simulated Systems
+
+We worte simulation of HBase, Cassandra, MongoDB, and Riak; the simulation code can be found in the corresponding sub-directories. 
+
+We encourage other system simulations to be written.
+
+
+
+# Contact 
+
+If you encouter any problems in using the framework, please contact suli@cs.wisc.edu.
+
+Enjoy!

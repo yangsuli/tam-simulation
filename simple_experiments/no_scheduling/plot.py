@@ -1,5 +1,5 @@
 import sys
-from plot_helper import get_average_throughput
+from util.plot_helper import get_average_throughput
 
 import matplotlib.pyplot as plt
 

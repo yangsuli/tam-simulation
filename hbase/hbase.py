@@ -3,6 +3,7 @@ import sys
 
 import numpy as np
 import simpy
+import ConfigParser
 from simpy.resources.base import BaseResource
 
 from client import Client

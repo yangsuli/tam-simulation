@@ -274,12 +274,12 @@ class HBaseReq(object):
         :param client_id:
         :param rpc_size: size of the rpc request region server has to read in
         :param reply_size: rpc reply size sent back to the client
-        :param rpc_time: cpu time used to handle hbase rpc_calls
+        :param rpc_time: cpu time used to handle hbase rpc calls
         :param mem_update_size:
         :param log_append_size:
         :param namenode_lookup_time: timed used look up namenode metadata (holding hdfs namespace lock)
         :param datanode_read_size: read from datanode
-        #param log_sync: do we wait until log is persisted to hdfs before sending reply to client?
+        :param log_sync: do we wait until log is persisted to hdfs before sending reply to client?
         :param short_circuit: hdfs short-circuit read
 
         all sizes are in MBs

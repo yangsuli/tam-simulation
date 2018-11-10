@@ -45,7 +45,7 @@ We strongly encourage you to read the documentation of simpy before using the TA
 
 To show how the whole process works,  basic_example.py runs a very simple simulation under the TAM framework, with only
 a single stage.  
-Just run "python basic_example.py" and see what happens.  
+Just run `$ python basic_example.py` and see what happens.  
 
 When successfully run,  basic_example.py prints the client, resource and stage statistics to the standard output.
 However, when running a more complicated simulation, it is recommended to print client, resource and stage statistics
@@ -54,7 +54,7 @@ each to a separate log file, as it allows easier analysis.
 You can change basic_example.py and play around with it to see how things work.
 
 Once you are more familiar with the framework, take a look at simple_experiments.
-In there are slightly more complicated simulation experiments, tycially with two or three stages.  
+In there are slightly more complicated simulation experiments, typically with two or three stages.  
 The README of each sub-directory details what each experiment does.
 
 
@@ -67,7 +67,7 @@ We simulated HBase, Cassandra, MongoDB, and Riak, with both their original archi
 architectures that can potentially support better scheduling.
 
 The simulation code can be found in the corresponding sub-directories; check the README for details on how to configure
-and run each system
+and run each system.
 
 We encourage other system simulations to be written.
 

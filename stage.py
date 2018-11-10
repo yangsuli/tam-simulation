@@ -67,6 +67,13 @@ class Stage(object):
         return _total_service_time + in_service_time - _credit_service_time
 
     def put_req(self, req):
+        """
+        put request to the stage's req_queue, where it is subjected to scheduling
+
+        :param req: StageReq
+        :return: an event the indicating the put; only after the event succeeded (can wait on it by yield event)
+                 is the put completed
+        """
         if self.req_cost_func is not None:
             req._cost = self.req_cost_func(req)
         handler = self.req_queue.put(req)
@@ -352,90 +359,6 @@ class ExactResourceExecStage(SpeculativeExecStage):
             else:
                 raise Exception("unknown speculative process status")
             self.finish_service(w_id, req)
-
-
-class BoundServiceThreadsStage(Stage):
-    """
-    stage that limit the number of workers(threads) servicing one client
-    ideally we would want to limit the number of blocking workers per client
-    however, that will be hard because before picking up a request, we don't know whether it will block or not
-    so this is a compromise, which is used, in e.g., Cake
-    """
-
-    def __init__(self, env, name, num_workers, latency_bound, req_queue, req_cost_func=None, log_file=sys.stdout):
-        assert isinstance(req_queue, LimitInFlight)
-        Stage.__init__(self, env, name, num_workers, req_queue, req_cost_func, log_file)
-        self.req_history = {}  # (req_blocking_time, num_reqs) list, used to calculate average blocking time
-        self.latency_bound = latency_bound  # (low, high) tuple
-
-    def put_req(self, req):
-        # start by allowing each client occupy all workers
-        # will decrease the limit if the client spent too much time blocking
-        if self.req_queue.get_flight_limit(req.client_id) is None:
-            self.req_queue.set_flight_limit(req.client_id, len(self.workers))
-        return Stage.put_req(self, req)
-
-    def calc_stats(self):
-        Stage.calc_stats(self)
-        self.stats["blocking_latency"] = {}
-        for client_id in self.req_history:
-            total_blocking_latency = self.req_history[client_id][0]
-            num_reqs = self.req_history[client_id][1]
-            if num_reqs != 0:
-                self.stats["blocking_latency"][client_id] = float(total_blocking_latency) / num_reqs
-
-    def clear_stats(self):
-        Stage.clear_stats(self)
-        self.req_history = {}
-
-    def log_stats(self):
-        self.log_file.write(
-            "stage: %s time: %f utilization: %f real_utilization: %f service_threads: %s blocking_threads: %s blocking_latency: %s thread_limits: %s\n" % (
-                self.name, self.env.now, self.stats["utilization"], self.stats["real_utilization"],
-                str(self.current_service), str(self.current_blocking), str(self.stats["blocking_latency"]),
-                str(self.req_queue.get_flight_limit())))
-
-    def set_threads_limit(self, client_id, limit):
-        self.req_queue.set_flight_limit(client_id, limit)
-
-    def adjust_threads_limit(self):
-        for client_id in self.stats["blocking_latency"]:
-            cur_limit = self.req_queue.get_flight_limit(client_id)
-            assert cur_limit is not None
-
-            blocking_latency = self.stats["blocking_latency"][client_id]
-            if blocking_latency < self.latency_bound[0]:
-                self.req_queue.set_flight_limit(client_id, cur_limit + 1)
-            elif blocking_latency > self.latency_bound[1]:
-                limit = cur_limit * 0.9
-                if limit < 1:
-                    limit = 1
-                self.req_queue.set_flight_limit(client_id, limit)
-
-    def finish_blocking(self, w_id, req):
-        client_id = req.client_id
-        blocking_latency = self.env.now - self.start_blocking_time[w_id]
-
-        assert client_id in self.current_blocking
-        self.current_blocking[client_id] -= 1
-        self._total_blocking_time += blocking_latency
-        self.start_blocking_time[w_id] = None
-
-        if blocking_latency == 0:
-            return
-
-        if req.client_id not in self.req_history:
-            self.req_history[req.client_id] = [0, 0]
-        self.req_history[req.client_id][0] += blocking_latency
-        self.req_history[req.client_id][1] += 1
-
-    def monitor_run(self):
-        while True:
-            yield self.env.timeout(self.monitor_interval)
-            self.calc_stats()
-            self.log_stats()
-            self.adjust_threads_limit()
-            self.clear_stats()
 
 
 #########################################################################################################

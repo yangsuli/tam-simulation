@@ -66,6 +66,9 @@ class StageReq(object):
         return req_list
 
     def submit(self):
+        """
+        :return: an event the indicating the submission, only after the event succeeded is the submission successful
+        """
         return self.stage.put_req(self)
 
     def wait_submit(self):

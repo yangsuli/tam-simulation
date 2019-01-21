@@ -36,7 +36,7 @@ the user is free to implement their own scheduling policies as well.
 
 ### Putting them together  
 By assembling different stages, resources, and schedulers, possibly using a TAM as a blueprint, one can form systems with various thread architectures, which may reflect existing or hypothetical  system designs. 
-With a given simulated system, one can specify workload charactirstics (e.g., request types and arrival distribution); the framework then simulates how requests flow through the stages and consume resources, and reports detailed performance statistics. 
+With a given simulated system, one can specify workload characteristics (e.g., request types and arrival distribution); the framework then simulates how requests flow through the stages and consume resources, and reports detailed performance statistics. 
 
 # Getting Started
 
